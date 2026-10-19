@@ -6,7 +6,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from database import Base
-from main import app, obter_banco
+from main import app
+from routers.tarefas import obter_banco
 
 # Banco SQLite temporário, isolado dos dados reais
 engine_teste = create_engine(
