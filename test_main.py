@@ -135,3 +135,28 @@ def test_cadastrar_tarefa_com_descricao_muito_longa():
     )
 
     assert resposta.status_code == 422
+
+
+def test_atualizar_tarefa():
+    cadastro = client.post(
+        "/tarefas",
+        json={"descricao": "Estudar Python"}
+    )
+    tarefa_id = cadastro.json()["id"]
+
+    resposta = client.patch(
+        f"/tarefas/{tarefa_id}",
+        json={"descricao": "Estudar FastAPI"}
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["descricao"] == "Estudar FastAPI"
+
+
+def test_atualizar_tarefa_inexistente():
+    resposta = client.patch(
+        "/tarefas/999",
+        json={"descricao": "Estudar FastAPI"}
+    )
+
+    assert resposta.status_code == 404
