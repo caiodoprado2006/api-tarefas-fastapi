@@ -161,3 +161,33 @@ def test_atualizar_tarefa_inexistente():
     )
 
     assert resposta.status_code == 404
+
+
+def test_filtrar_tarefas_pendentes():
+    client.post(
+        "/tarefas/",
+        json={"descricao": "Tarefa pendente"},
+    )
+
+    resposta = client.get("/tarefas/?concluida=false")
+
+    assert resposta.status_code == 200
+    assert all(
+        tarefa["concluida"] is False
+        for tarefa in resposta.json()
+    )
+
+
+def test_filtrar_tarefas_concluidas():
+    cadastro = client.post(
+        "/tarefas/",
+        json={"descricao": "Tarefa concluida"},
+    )
+    tarefa_id = cadastro.json()["id"]
+
+    client.patch(f"/tarefas/{tarefa_id}/concluir")
+    resposta = client.get("/tarefas/?concluida=true")
+
+    assert resposta.status_code == 200
+    assert len(resposta.json()) == 1
+    assert resposta.json()[0]["concluida"] is True

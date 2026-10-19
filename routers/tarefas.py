@@ -33,9 +33,23 @@ class TarefaResposta(BaseModel):
     concluida: bool
 
 
+from typing import Optional
+
+
 @router.get("/", response_model=list[TarefaResposta])
-def listar_tarefas(banco: Session = Depends(obter_banco)):
-    return banco.query(models.Tarefa).all()
+def listar_tarefas(
+    concluida: Optional[bool] = None,
+    banco: Session = Depends(obter_banco),
+):
+    consulta = banco.query(models.Tarefa)
+
+    if concluida is not None:
+        consulta = consulta.filter(
+            models.Tarefa.concluida == concluida
+        )
+
+    return consulta.all()
+
 
 
 @router.post("/", response_model=TarefaResposta)
