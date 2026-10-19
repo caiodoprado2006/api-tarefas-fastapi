@@ -66,3 +66,42 @@ Atualmente, as tarefas ficam armazenadas em memória e são perdidas quando o se
 ## Autor
 
 Caio — Estudante de Engenharia de Software, com foco em desenvolvimento backend com Python.
+
+
+## Estrutura do projeto
+
+```text
+api-tarefas-fastapi/
+├── routers/
+│   ├── __init__.py
+│   └── tarefas.py
+├── main.py
+├── database.py
+├── models.py
+├── init_db.py
+├── test_main.py
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
+
+## Arquitetura
+
+- `main.py`: inicializa a aplicação FastAPI.
+- `routers/tarefas.py`: contém os endpoints de gerenciamento de tarefas.
+- `database.py`: configura a conexão e as sessões do banco SQLite.
+- `models.py`: define o modelo da tabela de tarefas.
+- `init_db.py`: permite criar as tabelas do banco.
+- `test_main.py`: contém os testes automatizados com pytest.
+
+
+## Endpoints
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| GET | `/` | Verificar se a API está funcionando |
+| GET | `/tarefas/` | Listar todas as tarefas |
+| POST | `/tarefas/` | Cadastrar uma nova tarefa |
+| PATCH | `/tarefas/{tarefa_id}` | Atualizar a descrição de uma tarefa |
+| PATCH | `/tarefas/{tarefa_id}/concluir` | Marcar uma tarefa como concluída |
+| DELETE | `/tarefas/{tarefa_id}` | Excluir uma tarefa |
