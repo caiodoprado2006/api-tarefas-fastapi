@@ -1,23 +1,60 @@
 # API de Gerenciamento de Tarefas
 
-API REST desenvolvida em Python com FastAPI para gerenciar tarefas.
+API REST desenvolvida com Python e FastAPI para cadastrar, listar, atualizar, concluir e excluir tarefas. O projeto utiliza SQLite para persistência de dados e Pytest para testes automatizados.
 
-## Tecnologias
+Projeto de portfólio desenvolvido durante meus estudos de Engenharia de Software, com foco em Backend Python.
+
+## Tecnologias utilizadas
 
 - Python
 - FastAPI
 - Pydantic
+- SQLAlchemy
+- SQLite
 - Pytest
 - Git e GitHub
 
 ## Funcionalidades
 
-- Cadastrar tarefas com validação de dados
-- Listar tarefas
-- Concluir tarefas pelo ID
-- Excluir tarefas pelo ID
-- Retornar erros HTTP para tarefas inexistentes
-- Executar testes automatizados
+- Cadastro de tarefas com validação de dados
+- Listagem de tarefas
+- Atualização da descrição de uma tarefa
+- Conclusão de tarefas
+- Exclusão de tarefas
+- Filtro por status: pendente ou concluída
+- Paginação de resultados
+- Persistência dos dados em SQLite
+- Respostas de erro para tarefas inexistentes
+- Testes automatizados dos endpoints
+
+## Endpoints
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| GET | `/` | Verificar se a API está funcionando |
+| GET | `/tarefas/` | Listar tarefas |
+| POST | `/tarefas/` | Cadastrar tarefa |
+| PATCH | `/tarefas/{tarefa_id}` | Atualizar descrição |
+| PATCH | `/tarefas/{tarefa_id}/concluir` | Concluir tarefa |
+| DELETE | `/tarefas/{tarefa_id}` | Excluir tarefa |
+
+## Filtros e paginação
+
+O endpoint `GET /tarefas/` aceita os seguintes parâmetros:
+
+| Parâmetro | Descrição | Padrão |
+|---|---|---|
+| `concluida` | Filtra por status (`true` ou `false`) | Todos os status |
+| `limite` | Quantidade de tarefas por página, de 1 a 100 | `10` |
+| `pagina` | Número da página, a partir de 1 | `1` |
+
+Exemplo de consulta:
+
+```text
+/tarefas/?concluida=false&limite=5&pagina=1
+```
+
+Essa consulta retorna até cinco tarefas pendentes da primeira página.
 
 ## Como executar o projeto
 
@@ -30,7 +67,7 @@ cd api-tarefas-fastapi
 
 ### 2. Criar e ativar o ambiente virtual
 
-No Windows:
+No Windows com PowerShell:
 
 ```powershell
 py -m venv .venv
@@ -43,30 +80,31 @@ py -m venv .venv
 py -m pip install -r requirements.txt
 ```
 
-### 4. Iniciar a API
+### 4. Criar as tabelas do banco de dados
+
+```powershell
+py init_db.py
+```
+
+### 5. Iniciar a API
 
 ```powershell
 py -m uvicorn main:app --reload
 ```
 
-A API estará disponível em http://127.0.0.1:8000.
+A documentação interativa estará disponível em:
 
-A documentação interativa estará disponível em http://127.0.0.1:8000/docs.
+http://127.0.0.1:8000/docs
 
 ## Executar os testes
+
+Com o ambiente virtual ativado, execute:
 
 ```powershell
 py -m pytest -v
 ```
 
-## Armazenamento
-
-Atualmente, as tarefas ficam armazenadas em memória e são perdidas quando o servidor é reiniciado.
-
-## Autor
-
-Caio — Estudante de Engenharia de Software, com foco em desenvolvimento backend com Python.
-
+Os testes verificam os principais endpoints, as validações, os filtros, a paginação e os erros esperados.
 
 ## Estrutura do projeto
 
@@ -85,23 +123,25 @@ api-tarefas-fastapi/
 └── README.md
 ```
 
-## Arquitetura
-
 - `main.py`: inicializa a aplicação FastAPI.
-- `routers/tarefas.py`: contém os endpoints de gerenciamento de tarefas.
-- `database.py`: configura a conexão e as sessões do banco SQLite.
+- `routers/tarefas.py`: implementa os endpoints.
+- `database.py`: configura o acesso ao banco de dados.
 - `models.py`: define o modelo da tabela de tarefas.
-- `init_db.py`: permite criar as tabelas do banco.
-- `test_main.py`: contém os testes automatizados com pytest.
+- `init_db.py`: cria as tabelas do banco.
+- `test_main.py`: contém os testes automatizados.
 
+## Melhorias futuras
 
-## Endpoints
+- Migrar de SQLite para PostgreSQL
+- Adicionar autenticação de usuários
+- Melhorar a organização dos testes
+- Configurar integração contínua
+- Disponibilizar a API em um serviço de hospedagem
 
-| Método | Endpoint | Descrição |
-|---|---|---|
-| GET | `/` | Verificar se a API está funcionando |
-| GET | `/tarefas/` | Listar todas as tarefas |
-| POST | `/tarefas/` | Cadastrar uma nova tarefa |
-| PATCH | `/tarefas/{tarefa_id}` | Atualizar a descrição de uma tarefa |
-| PATCH | `/tarefas/{tarefa_id}/concluir` | Marcar uma tarefa como concluída |
-| DELETE | `/tarefas/{tarefa_id}` | Excluir uma tarefa |
+## Autor
+
+Caio do Prado
+
+Estudante de Engenharia de Software, com foco em desenvolvimento Backend com Python.
+
+GitHub: https://github.com/caiodoprado2006
