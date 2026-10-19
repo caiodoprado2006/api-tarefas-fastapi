@@ -1,11 +1,44 @@
-from fastapi.testclient import TestClient
-from main import app, tarefas
 
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from database import Base
+from main import app, obter_banco
+
+# Banco SQLite temporário, isolado dos dados reais
+engine_teste = create_engine(
+    "sqlite://",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+
+SessaoTeste = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine_teste,
+)
+
+
+def obter_banco_teste():
+    banco = SessaoTeste()
+    try:
+        yield banco
+    finally:
+        banco.close()
+
+
+app.dependency_overrides[obter_banco] = obter_banco_teste
 client = TestClient(app)
 
 
-def setup_function():
-    tarefas.clear()
+@pytest.fixture(autouse=True)
+def preparar_banco():
+    Base.metadata.create_all(bind=engine_teste)
+    yield
+    Base.metadata.drop_all(bind=engine_teste)
 
 
 def test_inicio():
@@ -19,7 +52,7 @@ def test_inicio():
 def test_cadastrar_tarefa():
     resposta = client.post(
         "/tarefas",
-        json={"descricao": "Estudar Python"}
+        json={"descricao": "Estudar Python"},
     )
 
     assert resposta.status_code == 200
@@ -30,7 +63,7 @@ def test_cadastrar_tarefa():
 def test_rejeitar_descricao_curta():
     resposta = client.post(
         "/tarefas",
-        json={"descricao": "Oi"}
+        json={"descricao": "Oi"},
     )
 
     assert resposta.status_code == 422
@@ -39,7 +72,7 @@ def test_rejeitar_descricao_curta():
 def test_listar_tarefas():
     client.post(
         "/tarefas",
-        json={"descricao": "Estudar FastAPI"}
+        json={"descricao": "Estudar FastAPI"},
     )
 
     resposta = client.get("/tarefas")
@@ -51,7 +84,7 @@ def test_listar_tarefas():
 def test_concluir_tarefa():
     cadastro = client.post(
         "/tarefas",
-        json={"descricao": "Estudar testes"}
+        json={"descricao": "Estudar testes"},
     )
     tarefa_id = cadastro.json()["id"]
 
@@ -65,14 +98,13 @@ def test_concluir_tarefa():
 
 def test_concluir_tarefa_inexistente():
     resposta = client.patch("/tarefas/999/concluir")
-
     assert resposta.status_code == 404
 
 
 def test_excluir_tarefa():
     cadastro = client.post(
         "/tarefas",
-        json={"descricao": "Excluir esta tarefa"}
+        json={"descricao": "Excluir esta tarefa"},
     )
     tarefa_id = cadastro.json()["id"]
 
@@ -84,14 +116,13 @@ def test_excluir_tarefa():
 
 def test_excluir_tarefa_inexistente():
     resposta = client.delete("/tarefas/999")
-
     assert resposta.status_code == 404
 
 
 def test_cadastrar_tarefa_com_descricao_vazia():
     resposta = client.post(
         "/tarefas",
-        json={"descricao": ""}
+        json={"descricao": ""},
     )
 
     assert resposta.status_code == 422
@@ -100,7 +131,7 @@ def test_cadastrar_tarefa_com_descricao_vazia():
 def test_cadastrar_tarefa_com_descricao_muito_longa():
     resposta = client.post(
         "/tarefas",
-        json={"descricao": "A" * 101}
+        json={"descricao": "A" * 101},
     )
 
     assert resposta.status_code == 422
