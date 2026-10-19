@@ -191,3 +191,28 @@ def test_filtrar_tarefas_concluidas():
     assert resposta.status_code == 200
     assert len(resposta.json()) == 1
     assert resposta.json()[0]["concluida"] is True
+
+
+def test_paginacao_tarefas():
+    for numero in range(5):
+        client.post(
+            "/tarefas/",
+            json={"descricao": f"Tarefa numero {numero}"},
+        )
+
+    resposta = client.get("/tarefas/?limite=2&pagina=1")
+
+    assert resposta.status_code == 200
+    assert len(resposta.json()) == 2
+
+
+def test_paginacao_rejeita_limite_invalido():
+    resposta = client.get("/tarefas/?limite=101")
+
+    assert resposta.status_code == 422
+
+
+def test_paginacao_rejeita_pagina_invalida():
+    resposta = client.get("/tarefas/?pagina=0")
+
+    assert resposta.status_code == 422

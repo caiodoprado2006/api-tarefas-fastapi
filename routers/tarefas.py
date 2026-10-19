@@ -36,11 +36,26 @@ class TarefaResposta(BaseModel):
 from typing import Optional
 
 
+
 @router.get("/", response_model=list[TarefaResposta])
 def listar_tarefas(
-    concluida: Optional[bool] = None,
+    concluida: bool | None = None,
+    limite: int = 10,
+    pagina: int = 1,
     banco: Session = Depends(obter_banco),
 ):
+    if limite < 1 or limite > 100:
+        raise HTTPException(
+            status_code=422,
+            detail="O limite deve estar entre 1 e 100",
+        )
+
+    if pagina < 1:
+        raise HTTPException(
+            status_code=422,
+            detail="A página deve ser maior ou igual a 1",
+        )
+
     consulta = banco.query(models.Tarefa)
 
     if concluida is not None:
@@ -48,7 +63,10 @@ def listar_tarefas(
             models.Tarefa.concluida == concluida
         )
 
-    return consulta.all()
+    deslocamento = (pagina - 1) * limite
+
+    return consulta.offset(deslocamento).limit(limite).all()
+
 
 
 
